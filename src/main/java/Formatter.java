@@ -33,6 +33,7 @@ public class Formatter implements Server {
         this.server.createContext(ROOT, http -> {
             InputStreamReader isr = new InputStreamReader(http.getRequestBody());
             final String jsonRequest = new BufferedReader(isr).lines().collect(Collectors.joining());
+            System.out.println("request:" + jsonRequest);
             String jsonResponse;
             try {
                 Object object = builder.fromJson(jsonRequest, Object.class);
@@ -42,6 +43,7 @@ public class Formatter implements Server {
                 jsonError.addProperty("message", e.getMessage());
                 jsonResponse = builder.toJson(jsonError);
             }
+            System.out.println("response:" + jsonResponse);
             http.sendResponseHeaders(CODE_OK, jsonResponse.length());
             http.getResponseBody().write(jsonResponse.getBytes());
             http.close();
