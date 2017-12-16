@@ -22,8 +22,13 @@ public class Formatter implements Server {
     private static final int CODE_OK = 200;
     private static final String ROOT = "/";
 
+    public Formatter(@NotNull HttpServer server, @NotNull Gson builder) {
+        this.server = server;
+        this.builder = builder;
+    }
+
     /**
-     * Checking Json file
+     * Аppended new Json error
      *
      * @throws IOException because method create() of HttpServer can throw IOException
      */
