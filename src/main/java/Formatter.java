@@ -31,6 +31,7 @@ public class Formatter implements Server {
         this.builder = new GsonBuilder().setPrettyPrinting().create();
         this.server = HttpServer.create(new InetSocketAddress(PORT), 0);
         this.server.createContext(ROOT, http -> {
+            int request_id = 0;
             InputStreamReader isr = new InputStreamReader(http.getRequestBody());
             final String jsonRequest = new BufferedReader(isr).lines().collect(Collectors.joining());
             System.out.println("request:" + jsonRequest);
@@ -39,9 +40,18 @@ public class Formatter implements Server {
                 Object object = builder.fromJson(jsonRequest, Object.class);
                 jsonResponse = builder.toJson(object);
             } catch (JsonSyntaxException e) {
-                JsonObject jsonError = new JsonObject();
-                jsonError.addProperty("message", e.getMessage());
-                jsonResponse = builder.toJson(jsonError);
+                String[] errorSplittedString = e.getMessage().split(".+: | at ");
+                jsonResponse = builder.toJson(
+                        new JsonError(
+                                e.hashCode(),
+                                errorSplittedString[1],
+                                "at " + errorSplittedString[2],
+                                jsonRequest,
+                                request_id
+                        ));
+            } finally {
+                //noinspection UnusedAssignment
+                request_id++;
             }
             System.out.println("response:" + jsonResponse);
             http.sendResponseHeaders(CODE_OK, jsonResponse.length());
