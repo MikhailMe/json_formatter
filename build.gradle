@@ -1,0 +1,58 @@
+version = '0.1'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'docker'
+apply plugin: 'application'
+
+buildscript {
+
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'se.transmode.gradle:gradle-docker:1.2'
+    }
+
+}
+
+mainClassName = 'Formatter'
+
+defaultTasks 'docker'
+
+task wrapper(type: Wrapper) {
+    gradleVersion = "4.1"
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+docker {
+    baseImage = 'openjdk:8'
+}
+
+task docker(type: Docker) {
+    dependsOn "fatJar"
+    applicationName = "formatter"
+    setEnvironment("SERVER_PORT", "80")
+    exposePort(80)
+    addFile('build/libs/formatter-all-0.1.jar', 'opt/formatter-all-0.1.jar')
+    defaultCommand = ['java', "-jar", "opt/formatter-all-0.1.jar"]
+
+}
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+    compile group: 'com.intellij', name: 'annotations', version: '12.0'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
+}
