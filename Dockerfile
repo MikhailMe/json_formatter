@@ -6,5 +6,5 @@ EXPOSE 80
 
 
 # for gradle
-# ./gradlew docker && docker run -t —rm -p 80:80 formatter:0.1
+# ./gradlew docker && docker run -t -p 8000:80 formatter:0.1
 # curl -s --data-binary @filename.json http://localhost
